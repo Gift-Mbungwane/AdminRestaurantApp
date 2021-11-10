@@ -11,10 +11,11 @@ import bookings from "../../api/bookings";
 import { globalStyles } from "../../styles/globalStyles";
 import { auth, bookingCollection, db } from "../../database/firebase";
 import globalUserModel from "../Model";
+import moment from "moment";
 
 export default class AdminHome extends Component {
   state = {
-    users: null,
+    bookings: null,
   };
   constructor(props) {
     super(props);
@@ -40,11 +41,20 @@ export default class AdminHome extends Component {
         alert("we were unable to get the BookingDetails");
       });
 
-      
  
 */
-
     const uid = auth?.currentUser?.uid;
+    return db
+      .collection("bookings")
+      .where("uid", "==", uid)
+      .get()
+      .then((snapshot) => {
+        const resto = snapshot.docs.map((documentSnap) => documentSnap.data());
+        // console.log(resto);
+        this.setState({ bookings: resto });
+      });
+
+    // const uid = auth?.currentUser?.uid;
     const user = auth?.currentUser;
     const display = user.displayName;
     if (user !== null) {
@@ -203,7 +213,7 @@ export default class AdminHome extends Component {
         </View>
         <View>
           <FlatList
-            data={this.state.users}
+            data={this.state.bookings}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => {
               return (
@@ -217,11 +227,18 @@ export default class AdminHome extends Component {
                       }}
                     >
                       <Text>email: {item.address}</Text>
+
                       <Text>phone: {item.phone}</Text>
-                      <Text>number of guest: {item.numberOfGuest}</Text>
-                      <Text>time in: {item.timeIn}</Text>
+                      <Text>number of guest: {item.guest}</Text>
+                      <Text>time in: {item.timein}</Text>
                       <Text>time out: {item.timeOut}</Text>
-                      <Text>date: {item.date}</Text>
+                      <Text>
+                        date: {new Date(item.date.toDate()).toDateString()}
+                      </Text>
+                      <Text>
+                        Created At:
+                        {new Date(item.date.toDate()).toDateString()}{" "}
+                      </Text>
                     </View>
                     <View
                       style={{
