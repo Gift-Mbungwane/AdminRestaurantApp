@@ -1,21 +1,31 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { Component } from "react";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { NavigationContainer } from "@react-navigation/native";
+import { StyleSheet, Text, View } from "react-native";
+import { FontAwesome, AntDesign, MaterialIcons } from "@expo/vector-icons";
+import AdminHome from "./components/screens/AdminHome";
+import AdminLogIn from "./components/screens/AdminLogIn";
+import AdminRegister from "./components/screens/AdminRegister";
+import Main from "./components/screens/Main";
+import UpdateRestaurantScreen from "./components/screens/UpdateRestaurantScreen";
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+const Stack = createNativeStackNavigator();
+
+export default class App extends Component {
+  render() {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Main" component={Main} />
+          <Stack.Screen name="AdminLogIn" component={AdminLogIn} />
+          <Stack.Screen name="AdminRegister" component={AdminRegister} />
+          <Stack.Screen
+            name="UpdateRestaurantScreen"
+            component={UpdateRestaurantScreen}
+          />
+          <Stack.Screen name="AdminHome" component={AdminHome} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
