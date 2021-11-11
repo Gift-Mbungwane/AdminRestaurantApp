@@ -14,6 +14,7 @@ class Model {
   timeOut;
   date;
   description;
+  location;
 
   constructor() {}
 
@@ -21,6 +22,9 @@ class Model {
     this.uid = uid;
   }
 
+  setLocation(location) {
+    this.location = location;
+  }
   setName(name) {
     this.userName = name;
   }

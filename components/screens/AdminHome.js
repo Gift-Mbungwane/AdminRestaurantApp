@@ -237,7 +237,7 @@ export default class AdminHome extends Component {
                       </Text>
                       <Text>
                         Created At:
-                        {new Date(item.date.toDate()).toDateString()}{" "}
+                        {new Date(item.createdAt.toDate()).toDateString()}
                       </Text>
                     </View>
                     <View
@@ -250,7 +250,19 @@ export default class AdminHome extends Component {
                         alignSelf: "center",
                       }}
                     >
-                      <TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() =>
+                          navigate("ViewBooking", {
+                            address: item.address,
+                            guest: item.guest,
+                            phone: item.phone,
+                            timeIn: item.timein,
+                            timeOut: item.timeOut,
+                            date: item.date,
+                            createdAt: item.createdAt,
+                          })
+                        }
+                      >
                         <Text
                           style={{
                             alignSelf: "center",

@@ -52,10 +52,12 @@ export default function UpdateRestaurantScreen({ route, navigation }) {
     // const { navigate } = this.props.navigation;
     try {
       const uid = auth?.currentUser?.uid;
+      const photo = auth?.currentUser?.photoURL;
+      console.log(photo);
       return db
         .collection("admin")
         .doc(uid)
-        .set({
+        .update({
           uid: uid,
           displayName: globalUserModel.userName,
           email: globalUserModel.email,
@@ -63,17 +65,19 @@ export default function UpdateRestaurantScreen({ route, navigation }) {
           photoURL: globalUserModel.photo
             ? globalUserModel.photo
             : "https://www.google.com/url?sa=i&url=https%3A%2F%2Ffindicons.com%2Fsearch%2Favatar&psig=AOvVaw1sEiZj4FJSN9RhgnlAWSrl&ust=1632779417317000&source=images&cd=vfe&ved=0CAkQjRxqFwoTCKDOlcbPnfMCFQAAAAAdAAAAABAD",
+          location: globalUserModel.location,
+          description: globalUserModel.description,
         })
         .then((snapShot) => navigation.navigate("AdminHome"))
         .catch((error) => {
           const errorMessage = error.message;
-          alert("Couldn't update resturant Details");
+          alert("Couldn't update restaurant Details");
         });
 
       // ...
     } catch (error) {
       const errorMessage = error.message;
-      alert("Failed to update restaurant");
+      alert("Failed to update restaurant details, check your network");
     }
   };
 
@@ -174,6 +178,19 @@ try {
             />
             <TextInput
               multiline
+              placeholder="location"
+              style={{
+                borderRadius: 6,
+                backgroundColor: "white",
+                height: 35,
+                color: "black",
+                width: 250,
+              }}
+              onChangeText={(location) => globalUserModel.setLocation(location)}
+              value={globalUserModel.description}
+            />
+            <TextInput
+              multiline
               placeholder="Description"
               style={{
                 borderRadius: 6,
@@ -182,6 +199,7 @@ try {
                 color: "black",
                 width: 250,
                 height: 100,
+                marginVertical: 10,
               }}
               onChangeText={(description) =>
                 globalUserModel.setDecription(description)

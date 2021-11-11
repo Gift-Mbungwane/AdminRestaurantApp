@@ -8,7 +8,7 @@ import AdminLogIn from "./components/screens/AdminLogIn";
 import AdminRegister from "./components/screens/AdminRegister";
 import Main from "./components/screens/Main";
 import UpdateRestaurantScreen from "./components/screens/UpdateRestaurantScreen";
-
+import ViewBooking from "./components/screens/ViewBooking";
 const Stack = createNativeStackNavigator();
 
 export default class App extends Component {
@@ -24,6 +24,7 @@ export default class App extends Component {
             component={UpdateRestaurantScreen}
           />
           <Stack.Screen name="AdminHome" component={AdminHome} />
+          <Stack.Screen name="ViewBooking" component={ViewBooking} />
         </Stack.Navigator>
       </NavigationContainer>
     );

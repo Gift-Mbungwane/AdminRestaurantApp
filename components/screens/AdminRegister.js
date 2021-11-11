@@ -29,12 +29,27 @@ export default class AdminRegister extends Component {
         const user = userCredential.user;
         // Add a new document in collection "users"
         // ...
-        navigate("UpdateRestaurantScreen", {
-          uid: user.uid,
-          displayName: globalUserModel.userName,
-          email: globalUserModel.email,
-          password: globalUserModel.password,
-        });
+        return db
+          .collection("admin")
+          .doc(user.uid)
+          .set({
+            uid: user.uid,
+            displayName: globalUserModel.userName,
+            email: globalUserModel.email,
+            password: globalUserModel.password,
+          })
+          .then(() => {
+            navigate("UpdateRestaurantScreen", {
+              uid: user.uid,
+              displayName: globalUserModel.userName,
+              email: globalUserModel.email,
+              password: globalUserModel.password,
+            });
+          })
+          .catch((error) => {
+            const logInforError = erro.message;
+            alert("unable to register, please check your network");
+          });
 
         //
       })

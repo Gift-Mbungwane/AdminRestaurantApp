@@ -60,7 +60,7 @@ export const globalStyles = StyleSheet.create({
   },
   flatlistContainer: {
     width: "100%",
-    height: 120,
+    height: 135,
     flexDirection: "row",
     //flex: 1,
     backgroundColor: "darkgrey",
