@@ -50,47 +50,12 @@ export default class AdminHome extends Component {
       .get()
       .then((snapshot) => {
         const resto = snapshot.docs.map((documentSnap) => documentSnap.data());
-        // console.log(resto);
         this.setState({ bookings: resto });
       });
-
-    // const uid = auth?.currentUser?.uid;
     const user = auth?.currentUser;
     const display = user.displayName;
     if (user !== null) {
-      //const name = user.displayName;
-      // console.log("name:" + name);
-      console.log(display);
-      const admin = db.collection("admin").doc(uid).get("displayName");
-
-      console.log(admin);
-      /**.then((snapshot) => {
-          const displayName = snapshot.d;
-
-          const data = documentData.data();
-
-          this.setState({ users: data });
-          console.log(data);
-        })
-        .catch((error) => {
-          const errorMessage = error.message;
-          alert("we were unable to get the document");
-        }); */
     }
-    console.log(uid);
-    console.log(user.email);
-    //console.log(display);
-
-    /*
-    const { name, uid } = this.props.route.params;
-
-    //
-    return bookingCollection.collection(name).where("uid", "!=", uid).get();
-
-    const users = query.docs.map((documentSnap) => documentSnap.data());
-    console.log(users);
-
-*/
   }
   componentDidMount() {
     this.getData();
@@ -251,7 +216,11 @@ export default class AdminHome extends Component {
                       }}
                     >
                       <TouchableOpacity
-                        onPress={() =>
+                        onPress={() => {
+                          console.log(
+                            item.id +
+                              "this is a unique key to send the status back to the receiver "
+                          );
                           navigate("ViewBooking", {
                             address: item.address,
                             guest: item.guest,
@@ -260,8 +229,8 @@ export default class AdminHome extends Component {
                             timeOut: item.timeOut,
                             date: item.date,
                             createdAt: item.createdAt,
-                          })
-                        }
+                          });
+                        }}
                       >
                         <Text
                           style={{

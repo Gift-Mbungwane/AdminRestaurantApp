@@ -161,4 +161,14 @@ export const globalStyles = StyleSheet.create({
     width: Dimensions.get("window").width,
     height: Dimensions.get("window").height,
   },
+  changeStatusText: {
+    backgroundColor: "#53A1CD",
+    marginVertical: 15,
+    position: "relative",
+    marginVertical: 10,
+    height: 40,
+    width: 100,
+    alignSelf: "center",
+    borderRadius: 20,
+  },
 });
