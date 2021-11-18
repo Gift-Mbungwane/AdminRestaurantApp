@@ -25,22 +25,23 @@ import FAB from "react-native-fab";
 import { FloatingAction } from "react-native-floating-action";
 
 const image = require("../../assets/restaurant/register.jpg");
+
 const actions = [
   {
     text: "Pending",
     name: "Pending",
-    position: 2,
+    position: 1,
   },
 
   {
     text: "Cancel",
     name: "Cancel",
-    position: 3,
+    position: 2,
   },
   {
     text: "Approve",
     name: "Approve",
-    position: 4,
+    position: 3,
   },
 ];
 
@@ -59,19 +60,28 @@ export default class ViewBooking extends Component {
 
   render() {
     const { navigate } = this.props.navigation;
-    const { address, guest, phone, timeIn, timeOut, date, createdAt } =
-      this.props.route.params;
-
-    const action = ({ pending, aprove, cancel }) => {};
+    const {
+      address,
+      guest,
+      phone,
+      timeIn,
+      timeOut,
+      date,
+      createdAt,
+      photo,
+      uName,
+      uid,
+    } = this.props.route.params;
 
     return (
       <View style={globalStyles.container}>
+        {/**start of the modal */}
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
           <Modal
             animationType="fade"
-            transparent={false}
+            transparent={true}
             visible={this.state.isVisible}
             onRequestClose={() => {
               Alert.alert("Modal has now been closed.");
@@ -140,14 +150,21 @@ export default class ViewBooking extends Component {
             </View>
           </Modal>
         </View>
+        {/**end of the modal */}
         <View style={{ flexDirection: "row" }}>
-          <TouchableOpacity onPress={() => navigate("AdminHome")}>
+          <TouchableOpacity
+            onPress={() =>
+              navigate("AdminHome", {
+                uid: uid,
+              })
+            }
+          >
             <Ionicons name="ios-chevron-back" size={34} color="#53A1CD" />
           </TouchableOpacity>
         </View>
         <View>
           <Image
-            source={image}
+            source={{ uri: photo }}
             style={{
               width: 150,
               height: 150,

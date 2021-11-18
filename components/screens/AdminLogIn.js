@@ -30,8 +30,8 @@ export default class AdminLogIn extends Component {
         const user = userCredential.user;
         const name = userCredential.user.displayName;
         const uid = userCredential.user.uid;
-        console.log(name);
-        console.log(uid);
+        // console.log(name);
+        // console.log(uid);
         // ...
         const { navigate } = this.props.navigation;
 

@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
+  SafeAreaView,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import bookings from "../../api/bookings";
@@ -16,47 +17,39 @@ import moment from "moment";
 export default class AdminHome extends Component {
   state = {
     bookings: null,
+    key: "",
   };
   constructor(props) {
     super(props);
   }
 
   getData() {
-    /*  return db
-      .collection("bookings")
-      .doc(user)
-      .collection("Reservation")
-      .where("email", "!=", email)
-      .get()
-      .then((documentData) => {
-        const data = documentData.data();
-        //console.log(auth?.currentUser?.displayName);
-        this.setState({ users: data });
-        console.log(data);
-        console.log(email);
-        console.log(user);
-      })
-      .catch((error) => {
-        const errorMessage = error.message;
-        alert("we were unable to get the BookingDetails");
-      });
+    //const { uid } = this.props.route.params;
+    //console.log(uid + "this the uid of the admin currently logged");
+    try {
+      const uid = auth?.currentUser?.uid;
+      return db
+        .collection("bookings")
+        .where("uid", "==", uid)
+        .get()
+        .then((snapshot) => {
+          const resto = snapshot.docs.map((documentSnap) =>
+            documentSnap.data()
+          );
+          //console.log(resto);
 
- 
-*/
-    const uid = auth?.currentUser?.uid;
-    return db
-      .collection("bookings")
-      .where("uid", "==", uid)
-      .get()
-      .then((snapshot) => {
-        const resto = snapshot.docs.map((documentSnap) => documentSnap.data());
-        this.setState({ bookings: resto });
-      });
-    const user = auth?.currentUser;
-    const display = user.displayName;
-    if (user !== null) {
+          this.setState({ bookings: resto });
+        })
+        .catch((error) => {
+          const errorMessage = error.message;
+          alert("couldn't fetch data" + ":" + errorMessage);
+        });
+    } catch (error) {
+      const errorMessage = error.message;
+      alert("unable to get the data");
     }
   }
+
   componentDidMount() {
     this.getData();
   }
@@ -82,7 +75,6 @@ export default class AdminHome extends Component {
           }
         });
       })
-
       .catch((error) => {
         // An error happened.
         const errorMessage = error.message;
@@ -93,6 +85,8 @@ export default class AdminHome extends Component {
 
   render() {
     const { navigate } = this.props.navigation;
+    const { uid } = this.props.route.params;
+
     return (
       <View style={{ width: "100%", height: "100%" }}>
         <TouchableOpacity
@@ -120,6 +114,7 @@ export default class AdminHome extends Component {
                 justifyContent: "center",
                 marginHorizontal: 30,
               }}
+              onPress={() => navigate("AdminHome")}
             >
               <Text
                 style={{
@@ -163,6 +158,11 @@ export default class AdminHome extends Component {
                 justifyContent: "center",
                 marginHorizontal: 30,
               }}
+              onPress={() =>
+                navigate("AdminMenu", {
+                  uid: uid,
+                })
+              }
             >
               <Text
                 style={{
@@ -179,10 +179,9 @@ export default class AdminHome extends Component {
         <View>
           <FlatList
             data={this.state.bookings}
-            keyExtractor={(item) => item.id}
             renderItem={({ item }) => {
               return (
-                <View style={globalStyles.flatlistContainer}>
+                <View item={item} style={globalStyles.flatlistContainer}>
                   <View style={{ flexDirection: "row" }}>
                     <View
                       style={{
@@ -218,8 +217,8 @@ export default class AdminHome extends Component {
                       <TouchableOpacity
                         onPress={() => {
                           console.log(
-                            item.id +
-                              "this is a unique key to send the status back to the receiver "
+                            // item.id +
+                            "this is a unique key to send the status back to the receiver "
                           );
                           navigate("ViewBooking", {
                             address: item.address,
@@ -229,6 +228,9 @@ export default class AdminHome extends Component {
                             timeOut: item.timeOut,
                             date: item.date,
                             createdAt: item.createdAt,
+                            photo: item.photoURL,
+                            uName: item.uName,
+                            uid: auth?.currentUser?.uid,
                           });
                         }}
                       >
@@ -245,6 +247,7 @@ export default class AdminHome extends Component {
                 </View>
               );
             }}
+            keyExtractor={(item) => item.id}
           />
         </View>
       </View>

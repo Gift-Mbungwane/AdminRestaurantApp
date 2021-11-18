@@ -118,27 +118,15 @@ export default function UpdateRestaurantScreen({ route, navigation }) {
             </TouchableOpacity>
           </View>
           <View style={{ alignSelf: "center", flexDirection: "row" }}>
-            <TouchableOpacity
-            /*  onPress={() => {
-try {
-                    this.pickImage();
-                  } catch (error) {
-                    const errorMessage = error.message;
-                    alert("could pick image");
-                  }
-                }
-            }*/
-            >
-              <Image
-                source={{ uri: globalUserModel.photo }}
-                style={{
-                  width: 150,
-                  height: 150,
-                  borderRadius: 60,
-                  backgroundColor: "white",
-                }}
-              />
-            </TouchableOpacity>
+            <Image
+              source={{ uri: globalUserModel.photo }}
+              style={{
+                width: 150,
+                height: 150,
+                borderRadius: 60,
+                backgroundColor: "white",
+              }}
+            />
             <TouchableOpacity onPress={pickImage}>
               <FontAwesome
                 name="user-circle-o"
