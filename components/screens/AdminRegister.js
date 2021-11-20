@@ -33,7 +33,6 @@ export default class AdminRegister extends Component {
           .collection("admin")
           .doc(user.uid)
           .set({
-            uid: user.uid,
             displayName: globalUserModel.userName,
             email: globalUserModel.email,
             password: globalUserModel.password,
