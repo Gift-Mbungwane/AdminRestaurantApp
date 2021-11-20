@@ -15,6 +15,7 @@ class Model {
   date;
   description;
   location;
+  serviceOption;
 
   constructor() {}
 
@@ -27,6 +28,10 @@ class Model {
   }
   setName(name) {
     this.userName = name;
+  }
+
+  setServiceOption(serviceOption) {
+    this.serviceOption = serviceOption;
   }
 
   setSurname(surname) {

@@ -10,6 +10,7 @@ import {
   ScrollView,
   Modal,
   Platform,
+  FlatList,
 } from "react-native";
 import { globalStyles } from "../../styles/globalStyles";
 import { AntDesign, FontAwesome, Feather } from "@expo/vector-icons";
@@ -30,8 +31,10 @@ const actions = [
 ];
 
 export default function AdminMenu({ route, navigation }) {
-  const [isVisible, setVisible] = useState(true);
+  const [isVisible, setVisible] = useState(false);
   const [image, setImage] = useState("");
+  const [menu, setMenu] = useState("");
+  const [datasnap, setDatasnap] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -43,6 +46,7 @@ export default function AdminMenu({ route, navigation }) {
         }
       }
     })();
+    getData();
   }, []);
 
   const pickImage = async () => {
@@ -56,34 +60,83 @@ export default function AdminMenu({ route, navigation }) {
     console.log(result.uri);
 
     if (!result.cancelled) {
-      globalUserModel.setPhoto(result.uri);
+      setImage(result.uri);
     }
   };
 
-  useEffect(() => {
-    //pickImage();
-  }, []);
+  const getData = () => {
+    const { uid } = route.params;
+    return db
+      .collection("menu")
+      .where("uid", "==", uid)
+      .onSnapshot((querySnap) => {
+        const data = querySnap.docs.map((documentSnap) => documentSnap.data());
+        // console.log(data);
+        setDatasnap(data);
+      });
+  };
+
+  const uploadData = () => {
+    return db
+      .collection("menu")
+      .add({
+        photoURL: image,
+        menu: menu,
+        uid: auth?.currentUser?.uid,
+      })
+      .then((dataSnapshot) => {
+        dataSnapshot.update({ key: dataSnapshot.id });
+        alert(`${menu} has been added`);
+      })
+      .catch((error) => {
+        alert(
+          "please provide both the description of the menu and a picture of the actual menu"
+        );
+      });
+  };
 
   return (
     <View style={globalStyles.container}>
-      <Text style={{ alignSelf: "center", fontWeight: "bold", fontSize: 34 }}>
-        Menu
-      </Text>
+      <View style={{ flexDirection: "row", alignSelf: "center" }}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("AdminHome")}
+          style={{ alignSelf: "flex-start", right: 100, top: 7 }}
+        >
+          <Ionicons name="ios-chevron-back" size={34} color="#53A1CD" />
+        </TouchableOpacity>
+        <Text style={{ alignSelf: "center", fontWeight: "bold", fontSize: 34 }}>
+          Menu
+        </Text>
+      </View>
 
-      <View style={globalStyles.flatlistContainer}>
-        <Image source={image} style={globalStyles.image} />
-        <View>
-          <Text
-            style={{
-              alignSelf: "flex-end",
-              fontSize: 25,
-              marginHorizontal: 25,
-              marginVertical: 50,
-            }}
-          >
-            Dessert
-          </Text>
-        </View>
+      <View style={{ height: "90%" }}>
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={datasnap}
+          keyExtractor={(item) => item.key}
+          renderItem={({ item }) => {
+            return (
+              <View item={item} style={globalStyles.flatlistContainer}>
+                <Image
+                  source={{ uri: item.photoURL }}
+                  style={globalStyles.image}
+                />
+                <View>
+                  <Text
+                    style={{
+                      alignSelf: "flex-end",
+                      fontSize: 25,
+                      marginHorizontal: 25,
+                      marginVertical: 50,
+                    }}
+                  >
+                    {item.menu}
+                  </Text>
+                </View>
+              </View>
+            );
+          }}
+        />
         <View
           style={{
             flex: 1,
@@ -105,7 +158,7 @@ export default function AdminMenu({ route, navigation }) {
                 justifyContent: "center",
                 alignItems: "center",
                 backgroundColor: "#00BCD4",
-                height: 400,
+                height: "50%",
                 width: "80%",
                 borderRadius: 10,
                 borderWidth: 1,
@@ -114,7 +167,7 @@ export default function AdminMenu({ route, navigation }) {
                 marginLeft: 40,
               }}
             >
-              <View style={{ alignSelf: "flex-start", marginVertical: 40 }}>
+              <View style={{ alignSelf: "flex-start", marginVertical: 10 }}>
                 <TouchableOpacity
                   onPress={() => {
                     try {
@@ -124,32 +177,64 @@ export default function AdminMenu({ route, navigation }) {
                       alert(errorMessage);
                     }
                   }}
+                  style={{ marginBottom: 60, left: 10 }}
                 >
-                  <AntDesign
-                    name="closecircle"
+                  <AntDesign name="closecircle" size={24} color="grey" />
+                </TouchableOpacity>
+              </View>
+              <View
+                style={{
+                  alignSelf: "center",
+                  flexDirection: "row",
+                  bottom: 60,
+                }}
+              >
+                <Image
+                  source={{ uri: image }}
+                  style={{
+                    width: 150,
+                    height: 150,
+                    borderRadius: 60,
+                    backgroundColor: "white",
+                  }}
+                />
+                <TouchableOpacity onPress={pickImage}>
+                  <FontAwesome
+                    name="user-circle-o"
                     size={24}
-                    color="black"
-                    style={{ padding: 24 }}
+                    color="grey"
+                    style={{ marginHorizontal: -20, marginTop: 105 }}
                   />
                 </TouchableOpacity>
               </View>
               <View>
-                <Text> Reason for cancellation</Text>
-                <TextInput
-                  placeholder="reason for choosing status"
+                <TouchableOpacity
                   style={{
-                    borderRadius: 12,
-                    width: 200,
-                    height: 60,
-                    backgroundColor: "white",
+                    textDecorationLine: "underline",
+                    marginTop: -50,
+                    backgroundColor: "grey",
+                    borderRadius: 60,
+                    height: 40,
+                    width: 150,
                   }}
-                />
-                <TouchableOpacity style={globalStyles.changeStatusText}>
+                >
+                  <TextInput
+                    placeholder="Menu decription"
+                    onChangeText={(menu) => setMenu(menu)}
+                    style={{ color: "white" }}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View>
+                <TouchableOpacity
+                  style={globalStyles.changeStatusText}
+                  onPress={uploadData}
+                >
                   <Text
                     style={{
                       alignSelf: "center",
                       marginVertical: 10,
-                      color: "white",
+                      color: "black",
                       fontWeight: "bold",
                     }}
                   >
@@ -161,30 +246,31 @@ export default function AdminMenu({ route, navigation }) {
           </Modal>
         </View>
         {/**end of Modal */}
-        <View>
-          <TouchableOpacity
-            style={{
-              alignSelf: "flex-end",
-              marginHorizontal: 35,
-              marginVertical: 600,
-            }}
-          >
-            <FloatingAction
-              actions={[...actions]}
-              onPressItem={(name) => {
-                try {
-                  if (name == "Add Menu") {
-                    setVisible(true);
-                  } else {
-                    alert("exit without selection");
-                  }
-                } catch (error) {
-                  alert("could not call the modal");
+      </View>
+      <View>
+        <TouchableOpacity
+          style={{
+            alignSelf: "flex-end",
+            marginHorizontal: "-5%",
+            position: "absolute",
+            marginVertical: 50,
+          }}
+        >
+          <FloatingAction
+            actions={[...actions]}
+            onPressItem={(name) => {
+              try {
+                if (name == "Add Menu") {
+                  setVisible(true);
+                } else {
+                  alert("exit without selection");
                 }
-              }}
-            />
-          </TouchableOpacity>
-        </View>
+              } catch (error) {
+                alert("could not call the modal");
+              }
+            }}
+          />
+        </TouchableOpacity>
       </View>
     </View>
   );

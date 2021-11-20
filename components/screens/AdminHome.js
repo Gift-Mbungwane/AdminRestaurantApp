@@ -31,18 +31,13 @@ export default class AdminHome extends Component {
       return db
         .collection("bookings")
         .where("uid", "==", uid)
-        .get()
-        .then((snapshot) => {
+        .onSnapshot((snapshot) => {
           const resto = snapshot.docs.map((documentSnap) =>
             documentSnap.data()
           );
           //console.log(resto);
 
           this.setState({ bookings: resto });
-        })
-        .catch((error) => {
-          const errorMessage = error.message;
-          alert("couldn't fetch data" + ":" + errorMessage);
         });
     } catch (error) {
       const errorMessage = error.message;
@@ -85,7 +80,7 @@ export default class AdminHome extends Component {
 
   render() {
     const { navigate } = this.props.navigation;
-    const { uid } = this.props.route.params;
+    const uid = auth?.currentUser?.uid;
 
     return (
       <View style={{ width: "100%", height: "100%" }}>
@@ -127,7 +122,7 @@ export default class AdminHome extends Component {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => navigate("UpdateRestaurantScreen")}
+              onPress={() => navigate("UserScreen", { uid: uid })}
               style={{
                 borderRadius: 12,
                 backgroundColor: "#53A1CD",
@@ -171,83 +166,83 @@ export default class AdminHome extends Component {
                   fontWeight: "bold",
                 }}
               >
-                Bookings
+                Menu
               </Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
         <View>
           <FlatList
+            showsVerticalScrollIndicator={false}
             data={this.state.bookings}
             renderItem={({ item }) => {
               return (
-                <View item={item} style={globalStyles.flatlistContainer}>
-                  <View style={{ flexDirection: "row" }}>
-                    <View
-                      style={{
-                        flexDirection: "column",
-                        marginHorizontal: 20,
-                        marginVertical: 10,
-                      }}
-                    >
-                      <Text>email: {item.address}</Text>
-
-                      <Text>phone: {item.phone}</Text>
-                      <Text>number of guest: {item.guest}</Text>
-                      <Text>time in: {item.timein}</Text>
-                      <Text>time out: {item.timeOut}</Text>
-                      <Text>
-                        date: {new Date(item.date.toDate()).toDateString()}
-                      </Text>
-                      <Text>
-                        Created At:
-                        {new Date(item.createdAt.toDate()).toDateString()}
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        borderRadius: 20,
-                        backgroundColor: "grey",
-                        width: 120,
-                        height: 40,
-                        justifyContent: "center",
-                        alignSelf: "center",
-                      }}
-                    >
-                      <TouchableOpacity
-                        onPress={() => {
-                          console.log(
-                            // item.id +
-                            "this is a unique key to send the status back to the receiver "
-                          );
-                          navigate("ViewBooking", {
-                            address: item.address,
-                            guest: item.guest,
-                            phone: item.phone,
-                            timeIn: item.timein,
-                            timeOut: item.timeOut,
-                            date: item.date,
-                            createdAt: item.createdAt,
-                            photo: item.photoURL,
-                            uName: item.uName,
-                            uid: auth?.currentUser?.uid,
-                          });
+                <SafeAreaView>
+                  <View item={item} style={globalStyles.flatlistContainer}>
+                    <View style={{ flexDirection: "row" }}>
+                      <View
+                        style={{
+                          flexDirection: "column",
+                          marginHorizontal: 20,
+                          marginVertical: 10,
                         }}
                       >
-                        <Text
-                          style={{
-                            alignSelf: "center",
+                        <Text>email: {item.address}</Text>
+
+                        <Text>phone: {item.phone}</Text>
+                        <Text>number of guest: {item.guest}</Text>
+                        <Text>time in: {item.timein}</Text>
+                        <Text>time out: {item.timeOut}</Text>
+                        <Text>
+                          date: {new Date(item.date.toDate()).toDateString()}
+                        </Text>
+                        <Text>
+                          Created At:
+                          {new Date(item.createdAt.toDate()).toDateString()}
+                        </Text>
+                      </View>
+                      <View
+                        style={{
+                          borderRadius: 20,
+                          backgroundColor: "grey",
+                          width: 120,
+                          height: 40,
+                          justifyContent: "center",
+                          alignSelf: "center",
+                        }}
+                      >
+                        <TouchableOpacity
+                          onPress={() => {
+                            navigate("ViewBooking", {
+                              address: item.address,
+                              guest: item.guest,
+                              phone: item.phone,
+                              timeIn: item.timein,
+                              timeOut: item.timeOut,
+                              date: item.date,
+                              createdAt: item.createdAt,
+                              photo: item.photoURL,
+                              uName: item.uName,
+                              uid: uid,
+                              key: item.key,
+                            });
                           }}
                         >
-                          pending
-                        </Text>
-                      </TouchableOpacity>
+                          <Text
+                            style={{
+                              alignSelf: "center",
+                            }}
+                          >
+                            {item.status}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
-                </View>
+                </SafeAreaView>
               );
             }}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item, index) => item.uid}
           />
         </View>
       </View>

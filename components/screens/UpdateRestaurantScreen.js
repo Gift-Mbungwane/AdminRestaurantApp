@@ -47,6 +47,24 @@ export default function UpdateRestaurantScreen({ route, navigation }) {
     }
   };
 
+  const updateOption = () => {
+    let uid = auth?.currentUser?.email;
+    if (uid != null) {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/firebase.User
+
+      navigation.navigate("UserScreen", { uid: uid });
+      // alert("account is still signed in");
+
+      // ...
+    } else {
+      navigation.navigate("AdminLogIn");
+
+      // User is signed out
+      // used this if else method on signing out funtionality
+    }
+  };
+
   const updateResto = () => {
     //const { uid, displayName, email, password } = this.props.navigation;
     // const { navigate } = this.props.navigation;
@@ -59,14 +77,12 @@ export default function UpdateRestaurantScreen({ route, navigation }) {
         .doc(uid)
         .update({
           uid: uid,
-          displayName: globalUserModel.userName,
-          email: globalUserModel.email,
-          password: globalUserModel.password,
           photoURL: globalUserModel.photo
             ? globalUserModel.photo
             : "https://www.google.com/url?sa=i&url=https%3A%2F%2Ffindicons.com%2Fsearch%2Favatar&psig=AOvVaw1sEiZj4FJSN9RhgnlAWSrl&ust=1632779417317000&source=images&cd=vfe&ved=0CAkQjRxqFwoTCKDOlcbPnfMCFQAAAAAdAAAAABAD",
           location: globalUserModel.location,
           description: globalUserModel.description,
+          serviceOption: globalUserModel.serviceOption,
         })
         .then((snapShot) => navigation.navigate("AdminHome"))
         .catch((error) => {
@@ -94,21 +110,7 @@ export default function UpdateRestaurantScreen({ route, navigation }) {
       >
         <KeyboardAvoidingView>
           <View>
-            <TouchableOpacity
-              onPress={() => {
-                try {
-                  navigation.navigate("AdminRegister", {
-                    uid: auth?.currentUser?.uid,
-                    displayName: globalUserModel.userName,
-                    email: globalUserModel.email,
-                    password: globalUserModel.password,
-                  });
-                } catch (error) {
-                  const errorMessage = error.message;
-                  alert(errorMessage);
-                }
-              }}
-            >
+            <TouchableOpacity onPress={updateOption}>
               <AntDesign
                 name="closecircle"
                 size={24}
@@ -140,29 +142,26 @@ export default function UpdateRestaurantScreen({ route, navigation }) {
             style={{
               width: "75%",
               left: 15,
-              marginVertical: 10,
+              marginVertical: 20,
+              alignSelf: "center",
             }}
           >
-            <Input
-              placeholder="Restaurant Name"
-              value={globalUserModel.userName}
-              onChangeText={(userName) => globalUserModel.setName(userName)}
-              style={{ color: "#FFFFFF" }}
-            />
-            <Input
-              placeholder="email@admin.com"
-              onChangeText={(email) => globalUserModel.setEmail(email)}
-              style={{ color: "#FFFFFF" }}
-              value={globalUserModel.email}
-            />
-            <Input
-              placeholder="Restaurant Number"
+            <TextInput
               multiline
-              placeholder="Phone no: (+27) 0"
-              style={{ color: "#FFFFFF" }}
-              keyboardType="phone-pad"
-              onChangeText={(mobile) => globalUserModel.setMobile(mobile)}
-              value={globalUserModel.mobile}
+              placeholder="serviceOptions: No-contact delivery/Takeaway/Dine-in "
+              style={{
+                borderRadius: 6,
+                backgroundColor: "white",
+                height: 35,
+                color: "black",
+                width: 300,
+                alignSelf: "center",
+                right: 16,
+              }}
+              onChangeText={(service) =>
+                globalUserModel.setServiceOption(service)
+              }
+              value={globalUserModel.description}
             />
             <TextInput
               multiline
@@ -173,6 +172,7 @@ export default function UpdateRestaurantScreen({ route, navigation }) {
                 height: 35,
                 color: "black",
                 width: 250,
+                marginVertical: 10,
               }}
               onChangeText={(location) => globalUserModel.setLocation(location)}
               value={globalUserModel.description}
@@ -194,27 +194,6 @@ export default function UpdateRestaurantScreen({ route, navigation }) {
               }
               value={globalUserModel.description}
             />
-            <TouchableOpacity
-              style={{
-                height: 40,
-                width: 200,
-                borderRadius: 20,
-                backgroundColor: "white",
-                marginVertical: 10,
-              }}
-            >
-              <Text
-                style={{
-                  justifyContent: "center",
-                  alignSelf: "center",
-                  marginVertical: 10,
-                  fontWeight: "bold",
-                  fontSize: 14,
-                }}
-              >
-                Upload menu as Pdf
-              </Text>
-            </TouchableOpacity>
           </View>
           <TouchableOpacity
             style={{

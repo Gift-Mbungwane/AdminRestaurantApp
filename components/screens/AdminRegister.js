@@ -39,12 +39,7 @@ export default class AdminRegister extends Component {
             password: globalUserModel.password,
           })
           .then(() => {
-            navigate("UpdateRestaurantScreen", {
-              uid: user.uid,
-              displayName: globalUserModel.userName,
-              email: globalUserModel.email,
-              password: globalUserModel.password,
-            });
+            navigate("UpdateRestaurantScreen");
           })
           .catch((error) => {
             const logInforError = erro.message;
@@ -101,7 +96,7 @@ export default class AdminRegister extends Component {
               }}
             >
               <Input
-                placeholder="Restaurant"
+                placeholder="Restaurant name"
                 value={globalUserModel.userName}
                 onChangeText={(userName) => globalUserModel.setName(userName)}
                 style={{ color: "#FFFFFF" }}

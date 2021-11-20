@@ -162,7 +162,7 @@ export const globalStyles = StyleSheet.create({
     height: Dimensions.get("window").height,
   },
   changeStatusText: {
-    backgroundColor: "#53A1CD",
+    backgroundColor: "white",
     marginVertical: 15,
     position: "relative",
     marginVertical: 10,

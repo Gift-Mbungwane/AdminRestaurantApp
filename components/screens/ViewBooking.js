@@ -23,6 +23,7 @@ import moment from "moment";
 import { ListItem } from "react-native-elements/dist/list/ListItem";
 import FAB from "react-native-fab";
 import { FloatingAction } from "react-native-floating-action";
+import { db } from "../../database/firebase";
 
 const image = require("../../assets/restaurant/register.jpg");
 
@@ -48,14 +49,87 @@ const actions = [
 export default class ViewBooking extends Component {
   state = {
     isVisible: false,
-    name: "",
+    message: "",
+    status: "",
   };
   constructor(props) {
     super(props);
   }
 
   displayModal(show, name) {
-    this.setState({ isVisible: show, name: name });
+    this.setState({ isVisible: show, status: name });
+  }
+
+  updateCancel() {
+    const { key } = this.props.route.params;
+    const { navigate } = this.props.navigation;
+    //console.log(key)
+    console.log(this.state.status);
+    console.log(this.state.message);
+
+    return db
+      .collection("bookings")
+      .doc(key)
+      .update({
+        status: this.state.status,
+        message: this.state.message,
+      })
+      .then((snapShot) => {
+        //navigation.navigate("AdminHome");
+        alert("Booking has been cancelled");
+        this.displayModal(false);
+      })
+      .then(() => {
+        navigate("AdminHome", { key: key });
+      })
+      .catch((error) => {
+        const errorMessage = error.message;
+      })
+      .catch((error) => {
+        const errorMessage = error.message;
+      });
+  }
+
+  updateApprove(status) {
+    const { key } = this.props.route.params;
+    const { navigate } = this.props.navigation;
+
+    return db
+      .collection("bookings")
+      .doc(key)
+      .update({
+        status: status,
+        message: "Your booking has been approved",
+      })
+      .then((snapShot) => {
+        alert("Booking has been Approved");
+        navigate("AdminHome", { key: key });
+      })
+      .catch((error) => {
+        const errorMessage = error.message;
+        alert(errorMessage);
+      });
+  }
+
+  updatePending(status) {
+    const { key } = this.props.route.params;
+    const { navigate } = this.props.navigation;
+
+    return db
+      .collection("bookings")
+      .doc(key)
+      .update({
+        status: status,
+        message: "Your booking is still pending...",
+      })
+      .then((snapShot) => {
+        alert("status of booking the booking is still pending");
+        navigate("AdminHome", { key: key });
+      })
+      .catch((error) => {
+        const errorMessage = error.message;
+        alert(errorMessage);
+      });
   }
 
   render() {
@@ -71,6 +145,7 @@ export default class ViewBooking extends Component {
       photo,
       uName,
       uid,
+      key,
     } = this.props.route.params;
 
     return (
@@ -130,10 +205,20 @@ export default class ViewBooking extends Component {
                     height: 60,
                     backgroundColor: "white",
                   }}
+                  onChangeText={(message) =>
+                    this.setState({ message: message })
+                  }
                 />
                 <TouchableOpacity
                   style={globalStyles.changeStatusText}
-                  onPress={() => this.displayModal(false)}
+                  onPress={() => {
+                    try {
+                      this.updateCancel();
+                    } catch (error) {
+                      const errorMessage = error.message;
+                      alert("couldn't update the data");
+                    }
+                  }}
                 >
                   <Text
                     style={{
@@ -182,18 +267,17 @@ export default class ViewBooking extends Component {
             <FloatingAction
               actions={[...actions]}
               onPressItem={(name) => {
-                console.log(`selected button: ${name}`);
+                //  console.log(`selected button: ${name}`);
+                this.setState({ status: name });
                 try {
                   if (name == "Cancel") {
                     this.displayModal(true, name);
                   } else if (name == "Approve") {
-                    alert("Your have chosen to approve, please submit");
+                    this.updateApprove(name);
                   } else if (name == "Pending") {
-                    Alert("Booking is still pending for Aprooval or cancel");
+                    this.updatePending(name);
                   }
-                } catch (error) {
-                  alert("could not call the modal");
-                }
+                } catch (error) {}
               }}
               ref={(ref) => {
                 this.floatingAction = ref;
@@ -277,7 +361,7 @@ export default class ViewBooking extends Component {
             style={{
               alignSelf: "center",
               marginVertical: 10,
-              color: "white",
+              color: "black",
               fontWeight: "bold",
             }}
           >
