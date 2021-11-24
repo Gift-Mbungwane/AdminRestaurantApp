@@ -63,7 +63,7 @@ export const globalStyles = StyleSheet.create({
     height: 135,
     flexDirection: "row",
     //flex: 1,
-    backgroundColor: "darkgrey",
+    backgroundColor: "#53A1CD",
     borderRadius: 20,
     elevation: 40,
     margin: 15,

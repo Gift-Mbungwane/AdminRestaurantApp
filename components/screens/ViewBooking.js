@@ -7,7 +7,9 @@ import {
   Modal,
   TextInput,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
+
 import {
   Ionicons,
   SimpleLineIcons,
@@ -51,6 +53,8 @@ export default class ViewBooking extends Component {
     isVisible: false,
     message: "",
     status: "",
+    uploading: false,
+    submit: false,
   };
   constructor(props) {
     super(props);
@@ -66,6 +70,7 @@ export default class ViewBooking extends Component {
     //console.log(key)
     console.log(this.state.status);
     console.log(this.state.message);
+    this.setState({ uploading: true });
 
     return db
       .collection("bookings")
@@ -76,24 +81,30 @@ export default class ViewBooking extends Component {
       })
       .then((snapShot) => {
         //navigation.navigate("AdminHome");
-        alert("Booking has been cancelled");
+        this.setState({ uploading: false });
         this.displayModal(false);
+        alert("Booking has been cancelled");
       })
       .then(() => {
         navigate("AdminHome", { key: key });
       })
       .catch((error) => {
         const errorMessage = error.message;
+        alert(errorMessage);
+        this.setState({ submit: false });
       })
       .catch((error) => {
         const errorMessage = error.message;
+        alert(errorMessage);
+        this.setState({ submit: false });
       });
   }
 
   updateApprove(status) {
+    this.setState({ submit: true });
     const { key } = this.props.route.params;
     const { navigate } = this.props.navigation;
-
+    this.setState({ uploading: true });
     return db
       .collection("bookings")
       .doc(key)
@@ -102,19 +113,22 @@ export default class ViewBooking extends Component {
         message: "Your booking has been approved",
       })
       .then((snapShot) => {
+        this.setState({ submit: false });
         alert("Booking has been Approved");
         navigate("AdminHome", { key: key });
+        //this.setState({ uploading: false });
       })
       .catch((error) => {
         const errorMessage = error.message;
         alert(errorMessage);
+        this.setState({ submit: false });
       });
   }
 
   updatePending(status) {
     const { key } = this.props.route.params;
     const { navigate } = this.props.navigation;
-
+    this.setState({ submit: true });
     return db
       .collection("bookings")
       .doc(key)
@@ -123,12 +137,14 @@ export default class ViewBooking extends Component {
         message: "Your booking is still pending...",
       })
       .then((snapShot) => {
+        this.setState({ submit: false });
         alert("status of booking the booking is still pending");
         navigate("AdminHome", { key: key });
       })
       .catch((error) => {
         const errorMessage = error.message;
         alert(errorMessage);
+        this.setState({ submit: false });
       });
   }
 
@@ -220,16 +236,24 @@ export default class ViewBooking extends Component {
                     }
                   }}
                 >
-                  <Text
-                    style={{
-                      alignSelf: "center",
-                      marginVertical: 10,
-                      color: "white",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Submit
-                  </Text>
+                  {!this.state.uploading ? (
+                    <Text
+                      style={{
+                        alignSelf: "center",
+                        marginVertical: 10,
+                        color: "black",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Submit
+                    </Text>
+                  ) : (
+                    <ActivityIndicator
+                      style={{ alignSelf: "center" }}
+                      color="black"
+                      size="large"
+                    />
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
@@ -260,6 +284,13 @@ export default class ViewBooking extends Component {
             }}
           />
         </View>
+        {this.state.submit && (
+          <ActivityIndicator
+            style={{ alignSelf: "center" }}
+            color="black"
+            size="large"
+          />
+        )}
         <View style={{ marginVertical: 90, backgroundColor: "black" }}>
           <TouchableOpacity style={{ alignSelf: "flex-end" }}>
             {/*<SimpleLineIcons name="plus" size={34} color="black" />*/}
@@ -356,18 +387,6 @@ export default class ViewBooking extends Component {
             {new Date(createdAt.toDate()).toDateString()}
           </Text>
         </View>
-        <TouchableOpacity style={globalStyles.changeStatusText}>
-          <Text
-            style={{
-              alignSelf: "center",
-              marginVertical: 10,
-              color: "black",
-              fontWeight: "bold",
-            }}
-          >
-            Submit
-          </Text>
-        </TouchableOpacity>
       </View>
     );
   }

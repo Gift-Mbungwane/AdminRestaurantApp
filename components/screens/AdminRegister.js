@@ -5,6 +5,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import { AntDesign, Ionicons, FontAwesome } from "@expo/vector-icons";
 import { Input } from "react-native-elements";
@@ -14,10 +15,15 @@ import { auth, db, realtimedb } from "../../database/firebase";
 const image = require("../../assets/restaurant/register.jpg");
 
 export default class AdminRegister extends Component {
+  state = {
+    uploading: false,
+  };
+
   constructor(props) {
     super(props);
   }
   Register() {
+    this.setState({ uploading: true });
     const { navigate } = this.props.navigation;
     auth
       .createUserWithEmailAndPassword(
@@ -26,30 +32,24 @@ export default class AdminRegister extends Component {
       )
       .then((userCredential) => {
         // Signed in
-        const user = userCredential.user;
+        const user = userCredential.user.uid;
         // Add a new document in collection "users"
         // ...
-        return db
-          .collection("admin")
-          .doc(user.uid)
-          .set({
-            displayName: globalUserModel.userName,
-            email: globalUserModel.email,
-            password: globalUserModel.password,
-          })
-          .then(() => {
-            navigate("UpdateRestaurantScreen");
-          })
-          .catch((error) => {
-            const logInforError = erro.message;
-            alert("unable to register, please check your network");
-          });
+        this.setState({ uploading: false });
+        alert("Your account has been registered");
+        navigate("Restaurantdetails", {
+          displayName: globalUserModel.userName,
+          email: globalUserModel.email,
+          password: globalUserModel.password,
+        });
 
         //
       })
       .catch((error) => {
         const errorMessage = error.message;
         // alert(errorMessage);
+        this.setState({ uploading: false });
+
         alert("This account is registered, please sign in");
       });
   }
@@ -117,6 +117,13 @@ export default class AdminRegister extends Component {
               />
             </View>
           </KeyboardAvoidingView>
+          {this.state.uploading && (
+            <ActivityIndicator
+              size="large"
+              style={{ alignSelf: "center" }}
+              color="white"
+            />
+          )}
           <View style={{ flexDirection: "row", marginHorizontal: 25 }}>
             <Text
               style={{

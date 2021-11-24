@@ -7,6 +7,7 @@ import {
   Image,
   FlatList,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { color } from "react-native-elements/dist/helpers";
 import { Input } from "react-native-elements";
@@ -22,17 +23,17 @@ import {
 import { globalStyles } from "../../styles/globalStyles";
 import globalUserModel from "../Model";
 import * as ImagePicker from "expo-image-picker";
-import { auth, db } from "../../database/firebase";
+import { auth, db, storageRef } from "../../database/firebase";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const image = require("../../assets/restaurant/register.jpg");
 
 export default function UserScreen({ route, navigation }) {
+  const [uploading, setUploading] = useState(false);
+  const [submit, setSubmit] = useState(false);
   const [isVisible, setVisible] = useState(false);
   const [user, setUser] = useState(null);
-  const [image, setImage] = useState(
-    "https://www.google.com/url?sa=i&url=https%3A%2F%2Ffindicons.com%2Fsearch%2Favatar&psig=AOvVaw1sEiZj4FJSN9RhgnlAWSrl&ust=1632779417317000&source=images&cd=vfe&ved=0CAkQjRxqFwoTCKDOlcbPnfMCFQAAAAAdAAAAABAD"
-  );
+  const [image, setImage] = useState("");
   const { uid } = route.params;
 
   useEffect(() => {
@@ -59,30 +60,67 @@ export default function UserScreen({ route, navigation }) {
     console.log(result.uri);
     // globalUserModel.setPhoto(result.uri);
 
-    if (!result.cancelled && image == "") {
-      setImage(result.uri);
-      //globalUserModel.setPhoto(result.uri);
+    if (!result.cancelled) {
+      setSubmit(true);
+      globalUserModel.setPhoto(result.uri);
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function () {
+          reject(new TypeError("Network request failed!"));
+        };
+        xhr.responseType = "blob";
+        xhr.open("GET", result.uri, true);
+        xhr.send(null);
+      });
+
+      const ref = storageRef.child(new Date().toISOString());
+      const snapshot = (await ref.put(blob)).ref
+        .getDownloadURL()
+        .then((imageUrl) => {
+          globalUserModel.setPhoto(imageUrl);
+          console.log(
+            imageUrl,
+            "this is setting the image too storage before 3"
+          );
+
+          blob.close();
+          setSubmit(false);
+        });
+
+      // snapshot.snapshot.ref.getDownloadURL().then((imageUrl) => {
+      //   console.log(imageUrl, "this is setting the image too storage before 2");
+      //   setPhoto(imageUrl);
+      // });
     }
   };
 
   const upDate = () => {
     const uid = auth?.currentUser?.uid;
+    setSubmit(true);
     return db
       .collection("admin")
       .doc(uid)
       .update({
-        photoURL: image,
+        photoURL: globalUserModel.photo,
         userName: globalUserModel.userName,
         location: globalUserModel.location,
       })
-      .then(() => setVisible(false))
+      .then(() => {
+        setSubmit(false);
+        setVisible(false);
+      })
       .catch((error) => {
+        setSubmit(false);
         alert("could not update this information");
       });
   };
 
   const fetchData = () => {
     const uid = auth?.currentUser?.uid;
+
     return db
       .collection("admin")
       .where("uid", "==", uid)
@@ -93,6 +131,8 @@ export default function UserScreen({ route, navigation }) {
       });
   };
   const Signout = () => {
+    setUploading(true);
+
     auth
       .signOut()
       .then(() => {
@@ -102,10 +142,12 @@ export default function UserScreen({ route, navigation }) {
             // https://firebase.google.com/docs/reference/js/firebase.User
             const uid = user.uid;
             navigation.navigate("AdminLogIn");
+            setUploading(false);
             // alert("account is still signed in");
 
             // ...
           } else {
+            setUploading(false);
             alert("you're now logged out");
             navigation.navigate("AdminLogIn");
 
@@ -118,6 +160,7 @@ export default function UserScreen({ route, navigation }) {
         // An error happened.
         const errorMessage = error.message;
         console.log(errorMessage);
+        setUploading(false);
         alert("unable to signout");
       });
   };
@@ -179,7 +222,7 @@ export default function UserScreen({ route, navigation }) {
                 }}
               >
                 <Image
-                  source={{ uri: image }}
+                  source={{ uri: globalUserModel.photo }}
                   style={{
                     width: 150,
                     height: 150,
@@ -187,11 +230,12 @@ export default function UserScreen({ route, navigation }) {
                     backgroundColor: "white",
                   }}
                 />
+
                 <TouchableOpacity onPress={pickImage}>
                   <FontAwesome
                     name="user-circle-o"
                     size={24}
-                    color="white"
+                    color="grey"
                     style={{ marginHorizontal: -20, marginTop: 105 }}
                   />
                 </TouchableOpacity>
@@ -213,16 +257,24 @@ export default function UserScreen({ route, navigation }) {
                   style={globalStyles.changeStatusText}
                   onPress={upDate}
                 >
-                  <Text
-                    style={{
-                      alignSelf: "center",
-                      marginVertical: 10,
-                      color: "black",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Submit
-                  </Text>
+                  {!submit ? (
+                    <Text
+                      style={{
+                        alignSelf: "center",
+                        marginVertical: 10,
+                        color: "black",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Submit
+                    </Text>
+                  ) : (
+                    <ActivityIndicator
+                      style={{ alignSelf: "center" }}
+                      color="black"
+                      size="large"
+                    />
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
@@ -356,12 +408,20 @@ export default function UserScreen({ route, navigation }) {
                   }}
                   onPress={Signout}
                 >
-                  <AntDesign
-                    name="logout"
-                    size={30}
-                    color="white"
-                    style={{ alignSelf: "center", marginVertical: 10 }}
-                  />
+                  {!uploading ? (
+                    <AntDesign
+                      name="logout"
+                      size={30}
+                      color="white"
+                      style={{ alignSelf: "center", marginVertical: 10 }}
+                    />
+                  ) : (
+                    <ActivityIndicator
+                      size="large"
+                      color="black"
+                      style={{ alignSelf: "center" }}
+                    />
+                  )}
                 </TouchableOpacity>
               </SafeAreaView>
             );

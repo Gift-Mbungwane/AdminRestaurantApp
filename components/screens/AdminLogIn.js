@@ -5,6 +5,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import { AntDesign, Ionicons, FontAwesome } from "@expo/vector-icons";
 import { Input } from "react-native-elements";
@@ -15,11 +16,16 @@ import firebase from "firebase";
 const image = require("../../assets/restaurant/register.jpg");
 
 export default class AdminLogIn extends Component {
+  state = {
+    uploading: false,
+  };
+
   constructor(props) {
     super(props);
   }
 
   Login() {
+    this.setState({ uploading: true });
     auth
       .signInWithEmailAndPassword(
         globalUserModel.email,
@@ -39,13 +45,16 @@ export default class AdminLogIn extends Component {
           navigate("AdminHome", {
             uid: uid,
           });
+          this.setState({ uploading: false });
         } else {
           alert("no acount has been found");
         }
       })
       .catch((error) => {
         const errorMessage = error.message;
+        this.setState({ uploading: false });
         alert("Your Account does not exist, please register");
+
         //alert(errorMessage);
         //  alert("this account is not registered");
         // alert(errorMessage);
@@ -221,35 +230,43 @@ export default class AdminLogIn extends Component {
             >
               Sign in
             </Text>
-            <TouchableOpacity
-              onPress={() => {
-                try {
-                  // navigate("AdminHome");
-                  this.Login();
-                } catch (error) {
-                  const erro = error.message;
-                  alert("please check your email and password");
-                }
-              }}
-              style={{
-                borderRadius: 40,
-                backgroundColor: "#FFFFFF",
-                marginHorizontal: "53%",
-                height: 50,
-                width: 50,
-              }}
-            >
-              <Ionicons
-                name="ios-chevron-back"
-                size={34}
-                color="black"
-                style={{
-                  alignSelf: "center",
-                  marginVertical: 7,
-                  transform: [{ rotateY: "180deg" }],
+            {!this.state.uploading ? (
+              <TouchableOpacity
+                onPress={() => {
+                  try {
+                    // navigate("AdminHome");
+                    this.Login();
+                  } catch (error) {
+                    const erro = error.message;
+                    alert("please check your email and password");
+                  }
                 }}
+                style={{
+                  borderRadius: 40,
+                  backgroundColor: "#FFFFFF",
+                  marginHorizontal: "53%",
+                  height: 50,
+                  width: 50,
+                }}
+              >
+                <Ionicons
+                  name="ios-chevron-back"
+                  size={34}
+                  color="black"
+                  style={{
+                    alignSelf: "center",
+                    marginVertical: 7,
+                    transform: [{ rotateY: "180deg" }],
+                  }}
+                />
+              </TouchableOpacity>
+            ) : (
+              <ActivityIndicator
+                size="large"
+                color="black"
+                style={{ alignSelf: "center", justifyContent: "center" }}
               />
-            </TouchableOpacity>
+            )}
           </View>
           <View style={{ flexDirection: "row", marginVertical: 55 }}>
             <TouchableOpacity
@@ -276,6 +293,7 @@ export default class AdminLogIn extends Component {
                 style={{ alignSelf: "center", marginVertical: 7 }}
               />
             </TouchableOpacity>
+
             <TouchableOpacity
               onPress={() => {
                 try {
@@ -300,6 +318,7 @@ export default class AdminLogIn extends Component {
                 style={{ alignSelf: "center", marginVertical: 7 }}
               />
             </TouchableOpacity>
+
             <TouchableOpacity
               onPress={() => {
                 try {

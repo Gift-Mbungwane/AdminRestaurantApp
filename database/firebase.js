@@ -26,6 +26,7 @@ const userCollection = db.collection("users");
 const bookingCollection = db.collection("booking").doc("reservation");
 const realtimedb = app.database();
 const storage = app.storage();
+const storageRef = storage.ref();
 
 export {
   db,
@@ -34,5 +35,6 @@ export {
   firebaseApp,
   realtimedb,
   storage,
+  storageRef,
   bookingCollection,
 };

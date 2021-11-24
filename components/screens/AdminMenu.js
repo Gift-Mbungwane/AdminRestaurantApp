@@ -11,13 +11,14 @@ import {
   Modal,
   Platform,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
 import { globalStyles } from "../../styles/globalStyles";
 import { AntDesign, FontAwesome, Feather } from "@expo/vector-icons";
 import globalUserModel from "../Model";
 import * as ImagePicker from "expo-image-picker";
 import { Button, Input } from "react-native-elements";
-import { auth, db } from "../../database/firebase";
+import { auth, db, storageRef } from "../../database/firebase";
 import { FloatingAction } from "react-native-floating-action";
 
 const image = require("../../assets/restaurant/register.jpg");
@@ -32,7 +33,8 @@ const actions = [
 
 export default function AdminMenu({ route, navigation }) {
   const [isVisible, setVisible] = useState(false);
-  const [image, setImage] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [image, setImage] = useState(null);
   const [menu, setMenu] = useState("");
   const [datasnap, setDatasnap] = useState(null);
 
@@ -60,7 +62,38 @@ export default function AdminMenu({ route, navigation }) {
     console.log(result.uri);
 
     if (!result.cancelled) {
-      setImage(result.uri);
+      setUploading(true);
+      // setImage(result.uri);
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function () {
+          reject(new TypeError("Network request failed!"));
+        };
+        xhr.responseType = "blob";
+        xhr.open("GET", result.uri, true);
+        xhr.send(null);
+      });
+      const ref = storageRef.child(new Date().toISOString());
+      const snapshot = (await ref.put(blob)).ref
+        .getDownloadURL()
+        .then((imageUrl) => {
+          setImage(imageUrl);
+          console.log(
+            imageUrl,
+            "this is setting the image too storage before 3"
+          );
+
+          blob.close();
+          setUploading(false);
+        });
+
+      // snapshot.snapshot.ref.getDownloadURL().then((imageUrl) => {
+      //   console.log(imageUrl, "this is setting the image too storage before 2");
+      //   setPhoto(imageUrl);
+      // });
     }
   };
 
@@ -77,6 +110,7 @@ export default function AdminMenu({ route, navigation }) {
   };
 
   const uploadData = () => {
+    setUploading(true);
     return db
       .collection("menu")
       .add({
@@ -86,9 +120,13 @@ export default function AdminMenu({ route, navigation }) {
       })
       .then((dataSnapshot) => {
         dataSnapshot.update({ key: dataSnapshot.id });
+        setUploading(false);
+
         alert(`${menu} has been added`);
+        setVisible(!isVisible);
       })
       .catch((error) => {
+        setUploading(false);
         alert(
           "please provide both the description of the menu and a picture of the actual menu"
         );
@@ -125,7 +163,7 @@ export default function AdminMenu({ route, navigation }) {
                   <Text
                     style={{
                       alignSelf: "flex-end",
-                      fontSize: 25,
+                      fontSize: 18,
                       marginHorizontal: 25,
                       marginVertical: 50,
                     }}
@@ -157,7 +195,7 @@ export default function AdminMenu({ route, navigation }) {
               style={{
                 justifyContent: "center",
                 alignItems: "center",
-                backgroundColor: "#00BCD4",
+                backgroundColor: "#53A1CD",
                 height: "50%",
                 width: "80%",
                 borderRadius: 10,
@@ -198,6 +236,7 @@ export default function AdminMenu({ route, navigation }) {
                     backgroundColor: "white",
                   }}
                 />
+
                 <TouchableOpacity onPress={pickImage}>
                   <FontAwesome
                     name="user-circle-o"
@@ -218,7 +257,7 @@ export default function AdminMenu({ route, navigation }) {
                     width: 150,
                   }}
                 >
-                  <TextInput
+                  <Input
                     placeholder="Menu decription"
                     onChangeText={(menu) => setMenu(menu)}
                     style={{ color: "white" }}
@@ -230,16 +269,20 @@ export default function AdminMenu({ route, navigation }) {
                   style={globalStyles.changeStatusText}
                   onPress={uploadData}
                 >
-                  <Text
-                    style={{
-                      alignSelf: "center",
-                      marginVertical: 10,
-                      color: "black",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Submit
-                  </Text>
+                  {!uploading ? (
+                    <Text
+                      style={{
+                        alignSelf: "center",
+                        marginVertical: 10,
+                        color: "black",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Submit
+                    </Text>
+                  ) : (
+                    <ActivityIndicator size="large" color="white" />
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
