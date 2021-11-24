@@ -140,6 +140,7 @@ export default class AdminRegister extends Component {
                   this.Register();
                 } catch (error) {
                   const erro = error.message;
+                  this.setState({ uploading: false });
                   alert("please check your email and password");
                 }
               }}

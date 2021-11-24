@@ -238,6 +238,7 @@ export default class AdminLogIn extends Component {
                     this.Login();
                   } catch (error) {
                     const erro = error.message;
+                    this.setState({ uploading: false });
                     alert("please check your email and password");
                   }
                 }}
@@ -275,6 +276,7 @@ export default class AdminLogIn extends Component {
                   this.Google();
                 } catch (error) {
                   const errorMess = error.message;
+                  this.setState({ uploading: false });
                   alert("something went wrong while sigining in");
                 }
               }}
@@ -300,6 +302,7 @@ export default class AdminLogIn extends Component {
                   this.Apple();
                 } catch (error) {
                   const errorMess = error.message;
+                  this.setState({ uploading: false });
                   alert("something went wrong while sigining in");
                 }
               }}
@@ -327,6 +330,7 @@ export default class AdminLogIn extends Component {
                 } catch (error) {
                   const errorMess = error.message;
                   console.log(errorMess);
+                  this.setState({ uploading: false });
                   alert("something went wrong while sigining in");
                 }
               }}
